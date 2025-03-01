@@ -1,0 +1,162 @@
+//just a little thing with random saved values and cookies :)
+{import:jimx91u1ts}
+<style>
+  .thing {
+    margin: 20px;
+    padding: 20px;
+    border: 3px solid gainsboro;
+    border-radius: 10px;
+    background-color: dimgray;
+  }
+</style>
+
+<h1>Cookie Editor</h1>
+
+<div class="inset" style="background-color: black;">
+  <div class="thing">
+    <h3>Create a Cookie</h3>
+    <div>
+      <label for="cookieNameInput">Name:</label>
+      <input type="text" id="cookieNameInput" placeholder="cookie_name">
+      
+      <label for="cookieValueInput">Value:</label>
+      <input type="text" id="cookieValueInput" placeholder="cookie_value">
+      
+      <label for="expiryDaysInput">Expires (days):</label>
+      <input type="number" id="expiryDaysInput" value="7" min="0">
+      
+      <button id="setCookieBtn" onclick="setCookie()">Set Cookie</button>
+    </div>
+  </div>
+  
+  <div class="thing">
+    <h3>Get a Cookie</h3>
+    <div>
+      <label for="getCookieNameInput">Cookie Name:</label>
+      <input type="text" id="getCookieNameInput" placeholder="cookie_name">
+      
+      <button id="getCookieBtn" onclick="getCookie()">Get Cookie</button>
+    </div>
+    <div id="cookieValueDisplay"></div>
+  </div>
+  
+  <div class="thing">
+    <h3>Delete a Cookie</h3>
+    <div>
+      <label for="deleteCookieNameInput">Cookie Name:</label>
+      <input type="text" id="deleteCookieNameInput" placeholder="cookie_name">
+      
+      <button id="deleteCookieBtn" onclick="deleteCookie()">Delete Cookie</button>
+    </div>
+  </div>
+  
+  <div class="thing">
+    <h3>All Cookies</h3>
+    <button id="refreshCookiesBtn" onclick="showAllCookies()">Refresh List</button>
+    <div id="allCookiesDisplay"></div>
+  </div>
+</div>
+
+<script>
+  // Set a cookie with name, value and expiration days
+  function setCookie() {
+    let name = cookieNameInput.value.trim();
+    let value = cookieValueInput.value.trim();
+    let days = parseInt(expiryDaysInput.value) || 1;
+    
+    if (!name) {
+      alert("Please enter a cookie name");
+      return;
+    }
+    
+    let expires = "";
+    if (days > 0) {
+      let date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    
+    document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+    
+    alert("Cookie set successfully!");
+    showAllCookies();
+    
+    // Clear inputs
+    cookieNameInput.value = "";
+    cookieValueInput.value = "";
+  }
+  
+  // Get a specific cookie by name
+  function getCookieValue(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i].trim();
+      if (c.indexOf(nameEQ) === 0) {
+        return decodeURIComponent(c.substring(nameEQ.length, c.length));
+      }
+    }
+    return null;
+  }
+  
+  // Get and display a cookie
+  function getCookie() {
+    let name = getCookieNameInput.value.trim();
+    
+    if (!name) {
+      alert("Please enter a cookie name");
+      return;
+    }
+    
+    let value = getCookieValue(name);
+    
+    if (value !== null) {
+      cookieValueDisplay.textContent = `Value: "${value}"`;
+    } else {
+      cookieValueDisplay.textContent = "Cookie not found";
+    }
+  }
+  
+  // Delete a cookie
+  function deleteCookie() {
+    let name = deleteCookieNameInput.value.trim();
+    
+    if (!name) {
+      alert("Please enter a cookie name");
+      return;
+    }
+    
+    // Set expiration to past date to delete
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    
+    alert("Cookie deleted!");
+    showAllCookies();
+    deleteCookieNameInput.value = "";
+  }
+  
+  // Show all cookies
+  function showAllCookies() {
+    let cookieList = document.cookie.split(';');
+    let displayText = "";
+    
+    if (cookieList.length === 0 || (cookieList.length === 1 && cookieList[0].trim() === "")) {
+      displayText = "No cookies found";
+    } else {
+      for (let i = 0; i < cookieList.length; i++) {
+        if (cookieList[i].trim() !== "") {
+          let parts = cookieList[i].trim().split("=");
+          if (parts.length === 2) {
+            let name = parts[0];
+            let value = decodeURIComponent(parts[1]);
+            displayText += `${name} = "${value}"<br>`;
+          }
+        }
+      }
+    }
+    
+    allCookiesDisplay.innerHTML = displayText;
+  }
+  
+  // Show all cookies on page load
+  window.onload = showAllCookies;
+</script>
